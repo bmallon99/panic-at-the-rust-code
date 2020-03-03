@@ -7,7 +7,7 @@
 
 We are building a game that hopefully emulates some of the basics of the game Froggy Jump (shown above). In addition, we also want to make this a networked multiplayer game, so that a person may play with other people*. 
 
-########### *At least one as a basic requirement, more than one as a reach goal
+###### *At least one as a basic requirement, more than one as a reach goal
 
 ### Must-Have Requirements
 * Player controls a constantly jumping crab
