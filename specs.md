@@ -1,7 +1,7 @@
 # Crabby Jump
 ###### [aka…. Froggy Jump… but in Rust]
 
-<img src=”froggy_jump.jpg style=”height: 400px; width: auto;”/>
+<img src="https://github.com/bmallon99/panic-at-the-rust-code/blob/master/froggy_jump.jpg" style="height: 200; width: auto;"/>
 
 ## What We Plan to Build
 
