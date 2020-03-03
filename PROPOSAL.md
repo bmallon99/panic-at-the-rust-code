@@ -1,13 +1,13 @@
 # Crabby Jump
 ###### [aka…. Froggy Jump… but in Rust]
 
-<img src=”froggy_jump.jpg style=”height: 400px; width: auto;”/>
+<img src="https://github.com/bmallon99/panic-at-the-rust-code/blob/master/froggy_jump.jpg" style="height: 200; width: auto;"/>
 
 ## What We Plan to Build
 
 We are building a game that hopefully emulates some of the basics of the game Froggy Jump (shown above). In addition, we also want to make this a networked multiplayer game, so that a person may play with other people*. 
 
-########### *At least one as a basic requirement, more than one as a reach goal
+###### *At least one as a basic requirement, more than one as a reach goal
 
 ### Must-Have Requirements
 * Player controls a constantly jumping crab
