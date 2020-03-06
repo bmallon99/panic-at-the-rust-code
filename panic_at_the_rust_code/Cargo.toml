@@ -1,0 +1,9 @@
+[package]
+name = "panic_at_the_rust_code"
+version = "0.1.0"
+authors = ["Beth Mallon <bcool19992012@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
