@@ -16,8 +16,11 @@ pub const ARENA_WIDTH: f32 = 400.0;
 pub struct Crabby;
 
 // Component Constants
-pub const CRAB_HEIGHT: f32 = 7.0;
-pub const CRAB_WIDTH: f32 = 15.0;
+pub const CRAB_HEIGHT: f32 = 80.0;
+pub const CRAB_WIDTH: f32 = 120.0;
+
+pub const PLATFORM_HEIGHT: f32 = 80.0;
+pub const PLATFORM_WIDTH: f32 = 120.0;
 
 // C R A B
 pub struct Crab {
@@ -35,6 +38,25 @@ impl Crab {
 }
 
 impl Component for Crab {
+    type Storage = DenseVecStorage<Self>;
+}
+
+// Platform
+pub struct Platform {
+    pub width: f32,
+    pub height: f32,
+}
+
+impl Platform {
+    fn new() -> Platform {
+        Platform {
+            width: PLATFORM_WIDTH,
+            height: PLATFORM_HEIGHT,
+        }
+    }
+}
+
+impl Component for Platform {
     type Storage = DenseVecStorage<Self>;
 }
 
@@ -93,13 +115,29 @@ fn init_crab(world: &mut World, sprite: SpriteRender) {
     let mut transform = Transform::default();
 
     // Correctly position the crab.
-    transform.set_translation_xyz(ARENA_WIDTH * 0.5, 40.0, 0.0);
+    transform.set_translation_xyz(ARENA_WIDTH * 0.5, CRAB_HEIGHT * 2.0, 0.0);
 
     // Create a crab entity.
     world
         .create_entity()
         .with(sprite)
         .with(Crab::new())
+        .with(transform)
+        .build();
+}
+
+/// Initialise the crab in the middle on the ground
+fn init_platform(world: &mut World, sprite: SpriteRender, x: f32, y: f32) {
+    let mut transform = Transform::default();
+
+    // Correctly position the crab.
+    transform.set_translation_xyz(x, y, 0.0);
+
+    // Create a crab entity.
+    world
+        .create_entity()
+        .with(sprite)
+        .with(Platform::new())
         .with(transform)
         .build();
 }
