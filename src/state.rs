@@ -66,8 +66,8 @@ pub struct LoseState;
 
 pub struct MultiplayerState {
     crab_spawn_timer: Option<f32>,
-    crab_sprite_sheet_handle: Option<SpriteRender>,
-    krab_sprite_sheet_handle: Option<SpriteRender>,
+    crab: Option<Entity>,
+    krab: Option<Entity>,
     socket: Option<UdpSocket>,
 }
 
@@ -75,8 +75,8 @@ impl MultiplayerState {
     fn new(s: UdpSocket) -> Self {
         MultiplayerState {
             crab_spawn_timer: None,
-            crab_sprite_sheet_handle: None,
-            krab_sprite_sheet_handle: None,
+            crab: None,
+            krab: None,
             socket: Some(s),
         }
     }
@@ -263,11 +263,15 @@ impl SimpleState for MultiplayerState {
         init_camera(world, &dimensions);
 
         // Load our sprites and display them
-        self.crab_sprite_sheet_handle
+        /*self.crab_sprite_sheet_handle
             .replace(load_sprite(world, "Ferris"));
 
         self.krab_sprite_sheet_handle
-            .replace(load_sprite(world, "Ferris_blue"));
+            .replace(load_sprite(world, "Ferris_blue"));*/
+        let crab_sheet = load_sprite(world, "Ferris");
+        self.crab.replace(init_crab(world, crab_sheet));
+        let krab_sheet = load_sprite(world, "Ferris_blue");
+        self.krab.replace(init_krab(world, krab_sheet));
 
         world.register::<Crab>();
         world.register::<Krab>();
@@ -313,6 +317,7 @@ impl SimpleState for MultiplayerState {
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        /*
         if let Some(mut timer) = self.crab_spawn_timer.take() {
             // If the timer isn't expired yet, subtract the time that passed since the last update.
             {
@@ -327,21 +332,23 @@ impl SimpleState for MultiplayerState {
                 // If timer is not expired yet, put it back onto the state.
                 self.crab_spawn_timer.replace(timer);
             }
-        }
-
+        }*/
         let sock = self.socket.as_ref().unwrap();
-        let message = bincode::serialize(&data.world.read_resource::<Crab>().x_position).unwrap();
+        let crab_storage = data.world.read_storage::<Crab>();
+        let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
+        let message = bincode::serialize(&crab_entity.x_position).unwrap();
         match sock.send_to(&message, "192.168.0.127:34255") {
             Err(e) => println!("Network error {}", e),
             _ => {}
         }
 
         let mut buf = [0; 16];
+        let mut storage = data.world.write_storage::<Krab>();
+        let mut krab_entity = storage.get_mut(self.krab.unwrap()).unwrap();
         sock.recv_from(&mut buf).expect("Didn't receive data");
         let received: f32 = bincode::deserialize(&buf).unwrap();
-        data.world.write_resource::<Krab>().old_x_position =
-            data.world.read_resource::<Krab>().new_x_position;
-        data.world.write_resource::<Krab>().new_x_position = received;
+        krab_entity.old_x_position = krab_entity.new_x_position;
+        krab_entity.new_x_position = received;
 
         if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
             return Trans::Push(Box::new(LoseState));
