@@ -499,7 +499,7 @@ fn init_crab(world: &mut World, sprite: SpriteRender) -> Entity {
     let mut transform = Transform::default();
 
     // Correctly position the crab.
-    transform.set_translation_xyz(ARENA_WIDTH * 0.5, CRAB_HEIGHT * 2.5, 0.0);
+    transform.set_translation_xyz(ARENA_WIDTH * 0.5, CRAB_HEIGHT * 4, 0.0);
     let time = Time::default();
     let crab = Crab::new(time.absolute_real_time_seconds());
 
