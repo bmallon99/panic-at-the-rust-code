@@ -271,6 +271,7 @@ impl SimpleState for MultiplayerState {
         self.krab_sprite_sheet_handle.replace(load_sprite(world, "Ferris_blue"));
 
         world.register::<Crab>();
+        world.register::<Krab>();
 
         // Load platform sprite
         let platform_sprite = load_sprite(world, "platform_blue");
@@ -331,7 +332,7 @@ impl SimpleState for MultiplayerState {
 
         let sock = self.socket.as_ref().unwrap();
         let message = bincode::serialize(&data.world.read_resource::<Crab>().x_position).unwrap();
-        match sock.send_to(&message, "192.168.0.149:34254") {
+        match sock.send_to(&message, "192.168.0.127:34255") {
             Err(e) => println!("Network error {}", e),
             _ => {}
         }
@@ -399,7 +400,7 @@ impl SimpleState for MenuState {
                     }
                 }
                 data.world.write_resource::<Game>().current_state = CurrentState::Gameplay;
-                if let Ok(socket) = UdpSocket::bind("192.168.0.127:34255") {
+                if let Ok(socket) = UdpSocket::bind("192.168.0.149:34254") {
                     return Trans::Push(Box::new(MultiplayerState::new(socket)));
                 } else {
                     info!("Connection refuse");

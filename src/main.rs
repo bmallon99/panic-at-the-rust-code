@@ -29,6 +29,7 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(input_bundle)?
         .with(systems::CrabSystem, "crab_system", &["input_system"])
+        .with(systems::KrabSystem, "krab_system", &[])
         .with(systems::MoveCrabSystem, "move_crab", &[])
         .with(
             systems::JumpSystem,
