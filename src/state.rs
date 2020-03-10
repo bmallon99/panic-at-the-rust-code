@@ -43,7 +43,7 @@ impl Default for Game {
 /*** Component Constants ***/
 pub const CRAB_HEIGHT: f32 = 60.0;
 pub const CRAB_WIDTH: f32 = 117.0;
-pub const CRAB_VELOCITY_Y: f64 = 2.5;
+pub const CRAB_VELOCITY_Y: f64 = 1.75;
 
 pub const PLATFORM_HEIGHT: f32 = 40.0;
 pub const PLATFORM_WIDTH: f32 = 262.0;

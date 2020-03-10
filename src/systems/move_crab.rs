@@ -22,7 +22,7 @@ impl<'s> System<'s> for MoveCrabSystem {
         // Move the crab according to the time passed since he last jumped
         for (crab, local) in (&crabs, &mut locals).join() {
             let d_time = time.absolute_time_seconds() - crab.jump_start_time;
-            let a = -1.5;
+            let a = -1.1;
             local.prepend_translation_y(
                 (crab.velocity * d_time + 0.5 * (a) * d_time.powf(2.0)) as f32,
             );
