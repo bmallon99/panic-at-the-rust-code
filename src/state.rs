@@ -69,6 +69,8 @@ pub struct MultiplayerState {
     crab_spawn_timer: Option<f32>,
     crab: Option<Entity>,
     krab: Option<Entity>,
+    crab_sprite_sheet_handle: Option<SpriteRender>,
+    krab_sprite_sheet_handle: Option<SpriteRender>,
     socket: Option<UdpSocket>,
 }
 
@@ -78,6 +80,8 @@ impl MultiplayerState {
             crab_spawn_timer: None,
             crab: None,
             krab: None,
+            crab_sprite_sheet_handle: None,
+            krab_sprite_sheet_handle: None,
             socket: Some(s),
         }
     }
@@ -253,7 +257,7 @@ impl SimpleState for MultiplayerState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
-        self.crab_spawn_timer.replace(0.0);
+        self.crab_spawn_timer.replace(2.0);
 
         // Get the screen dimensions so we can initialize the camera and
         // place our sprites correctly later. We'll clone this since we'll
@@ -264,15 +268,16 @@ impl SimpleState for MultiplayerState {
         init_camera(world, &dimensions);
 
         // Load our sprites and display them
-        /*self.crab_sprite_sheet_handle
+        self.crab_sprite_sheet_handle
             .replace(load_sprite(world, "Ferris"));
 
         self.krab_sprite_sheet_handle
-            .replace(load_sprite(world, "Ferris_blue"));*/
+            .replace(load_sprite(world, "Ferris_blue"));
+        /*
         let crab_sheet = load_sprite(world, "Ferris");
         self.crab.replace(init_crab(world, crab_sheet));
         let krab_sheet = load_sprite(world, "Ferris_blue");
-        self.krab.replace(init_krab(world, krab_sheet));
+        self.krab.replace(init_krab(world, krab_sheet));*/
 
         world.register::<Crab>();
         world.register::<Krab>();
@@ -318,7 +323,6 @@ impl SimpleState for MultiplayerState {
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        /*
         if let Some(mut timer) = self.crab_spawn_timer.take() {
             // If the timer isn't expired yet, subtract the time that passed since the last update.
             {
@@ -327,13 +331,13 @@ impl SimpleState for MultiplayerState {
             }
             if timer <= 0.0 {
                 // When timer expire, spawn the crab
-                init_crab(data.world, self.crab_sprite_sheet_handle.clone().unwrap());
-                init_krab(data.world, self.krab_sprite_sheet_handle.clone().unwrap());
+                self.crab.replace(init_crab(data.world, self.crab_sprite_sheet_handle.clone().unwrap()));
+                self.krab.replace(init_krab(data.world, self.krab_sprite_sheet_handle.clone().unwrap()));
             } else {
                 // If timer is not expired yet, put it back onto the state.
                 self.crab_spawn_timer.replace(timer);
             }
-        }*/
+        }
         let sock = self.socket.as_ref().unwrap();
         let lose_message = bincode::serialize(&-1.).unwrap();
         if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
