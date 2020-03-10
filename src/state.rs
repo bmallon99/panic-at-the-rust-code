@@ -9,6 +9,8 @@ use amethyst::{
     window::ScreenDimensions,
 };
 
+
+// use bincode::{deserialize, serialize};
 use std::net::UdpSocket;
 
 use log::info;
@@ -65,7 +67,8 @@ pub struct LoseState;
 
 pub struct MultiplayerState {
     crab_spawn_timer: Option<f32>,
-    sprite_sheet_handle: Option<SpriteRender>,
+    crab_sprite_sheet_handle: Option<SpriteRender>,
+    krab_sprite_sheet_handle: Option<SpriteRender>,
     socket: Option<UdpSocket>,
 }
 
@@ -73,7 +76,8 @@ impl MultiplayerState {
     fn new(s: UdpSocket) -> Self {
         MultiplayerState {
             crab_spawn_timer: None,
-            sprite_sheet_handle: None,
+            crab_sprite_sheet_handle: None,
+            krab_sprite_sheet_handle: None,
             socket: Some(s)
         }
     }
@@ -86,6 +90,7 @@ pub struct Crab {
     pub jump_start_time: f64,
     pub width: f32,
     pub height: f32,
+    pub x_position: f32,
 }
 
 impl Crab {
@@ -95,11 +100,38 @@ impl Crab {
             jump_start_time: time,
             width: CRAB_WIDTH,
             height: CRAB_HEIGHT,
+            x_position: ARENA_WIDTH*0.5,
         }
     }
 }
 
 impl Component for Crab {
+    type Storage = DenseVecStorage<Self>;
+}
+
+pub struct Krab {
+    pub velocity: f64,
+    pub jump_start_time: f64,
+    pub width: f32,
+    pub height: f32,
+    pub old_x_position: f32,
+    pub new_x_position: f32,
+}
+
+impl Krab {
+    fn new(time: f64) -> Krab {
+        Krab {
+            velocity: CRAB_VELOCITY_Y,
+            jump_start_time: time,
+            width: CRAB_WIDTH,
+            height: CRAB_HEIGHT,
+            old_x_position: ARENA_WIDTH*0.5,
+            new_x_position: ARENA_WIDTH*0.5,
+        }
+    }
+}
+
+impl Component for Krab {
     type Storage = DenseVecStorage<Self>;
 }
 
@@ -232,9 +264,11 @@ impl SimpleState for MultiplayerState {
         init_camera(world, &dimensions);
 
         // Load our sprites and display them
-        self.sprite_sheet_handle
+        self.crab_sprite_sheet_handle
             .replace(load_sprite(world, "Ferris"));
         //init_sprites(world, &sprites, &dimensions);
+
+        self.krab_sprite_sheet_handle.replace(load_sprite(world, "Ferris_blue"));
 
         world.register::<Crab>();
 
@@ -287,7 +321,8 @@ impl SimpleState for MultiplayerState {
             }
             if timer <= 0.0 {
                 // When timer expire, spawn the crab
-                init_crab(data.world, self.sprite_sheet_handle.clone().unwrap());
+                init_crab(data.world, self.crab_sprite_sheet_handle.clone().unwrap());
+                init_krab(data.world, self.krab_sprite_sheet_handle.clone().unwrap());
             } else {
                 // If timer is not expired yet, put it back onto the state.
                 self.crab_spawn_timer.replace(timer);
@@ -295,10 +330,17 @@ impl SimpleState for MultiplayerState {
         }
 
         let sock = self.socket.as_ref().unwrap();
-        match sock.send_to(b"hello", "192.168.0.149:34254") {
+        let message = bincode::serialize(&data.world.read_resource::<Crab>().x_position).unwrap();
+        match sock.send_to(&message, "192.168.0.149:34254") {
             Err(e) => println!("Network error {}", e),
             _ => {}
         }
+
+        let mut buf = [0; 16];
+        sock.recv_from(&mut buf).expect("Didn't receive data");
+        let received: f32 = bincode::deserialize(&buf).unwrap();
+        data.world.write_resource::<Krab>().old_x_position = data.world.read_resource::<Krab>().new_x_position;
+        data.world.write_resource::<Krab>().new_x_position = received;
 
         if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
             return Trans::Push(Box::new(LoseState));
@@ -432,6 +474,24 @@ fn init_crab(world: &mut World, sprite: SpriteRender) -> Entity {
         .create_entity()
         .with(sprite)
         .with(crab)
+        .with(transform)
+        .build()
+}
+
+/// Initialise the krab in the middle on the ground
+fn init_krab(world: &mut World, sprite: SpriteRender) -> Entity {
+    let mut transform = Transform::default();
+
+    // Correctly position the crab.
+    transform.set_translation_xyz(ARENA_WIDTH * 0.5, CRAB_HEIGHT, 0.0);
+    let time = Time::default();
+    let krab = Krab::new(time.absolute_real_time_seconds());
+
+    // Create a crab entity.
+    world
+        .create_entity()
+        .with(sprite)
+        .with(krab)
         .with(transform)
         .build()
 }
