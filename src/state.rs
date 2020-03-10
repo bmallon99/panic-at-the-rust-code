@@ -335,25 +335,24 @@ impl SimpleState for MultiplayerState {
             }
         }*/
         let sock = self.socket.as_ref().unwrap();
-        
         let lose_message = bincode::serialize(&-1.).unwrap();
+        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
+            send_message(sock, &lose_message);
+            return Trans::Push(Box::new(LoseState));
+        }
+
         let crab_storage = data.world.read_storage::<Crab>();
         let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
         let message = bincode::serialize(&crab_entity.x_position).unwrap();
 
-        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
-            send_message(sock, &lose_message);
-            return Trans::Push(Box::new(LoseState));
-        } else {
-            send_message(sock, &message);
+        send_message(sock, &message);
 
-        }
         
         let mut buf = [0; 16];
         let mut storage = data.world.write_storage::<Krab>();
         let mut krab_entity = storage.get_mut(self.krab.unwrap()).unwrap();
         match sock.recv_from(&mut buf) {
-            Err(e) => {
+            Err(_e) => {
                 send_message(sock, &lose_message);
                 return Trans::Push(Box::new(LoseState));
             },
