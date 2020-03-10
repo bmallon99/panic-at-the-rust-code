@@ -11,6 +11,7 @@ use amethyst::{
 
 // use bincode::{deserialize, serialize};
 use std::net::UdpSocket;
+use std::time::Duration;
 
 use log::info;
 
@@ -408,6 +409,10 @@ impl SimpleState for MenuState {
                 }
                 data.world.write_resource::<Game>().current_state = CurrentState::Gameplay;
                 if let Ok(socket) = UdpSocket::bind("192.168.0.149:34254") {
+                    match socket.set_read_timeout(Some(Duration::new(1, 0))) {
+                        Err(e) => println!("what {}", e),
+                        _ => {}
+                    }
                     return Trans::Push(Box::new(MultiplayerState::new(socket)));
                 } else {
                     info!("Connection refuse");
