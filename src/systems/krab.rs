@@ -9,10 +9,7 @@ use crate::state::Krab;
 pub struct KrabSystem;
 
 impl<'s> System<'s> for KrabSystem {
-    type SystemData = (
-        WriteStorage<'s, Transform>,
-        ReadStorage<'s, Krab>,
-    );
+    type SystemData = (WriteStorage<'s, Transform>, ReadStorage<'s, Krab>);
 
     fn run(&mut self, (mut transforms, krabs): Self::SystemData) {
         for (krab, transform) in (&krabs, &mut transforms).join() {

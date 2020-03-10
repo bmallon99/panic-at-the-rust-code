@@ -9,7 +9,6 @@ use amethyst::{
     window::ScreenDimensions,
 };
 
-
 // use bincode::{deserialize, serialize};
 use std::net::UdpSocket;
 
@@ -78,7 +77,7 @@ impl MultiplayerState {
             crab_spawn_timer: None,
             crab_sprite_sheet_handle: None,
             krab_sprite_sheet_handle: None,
-            socket: Some(s)
+            socket: Some(s),
         }
     }
 }
@@ -100,7 +99,7 @@ impl Crab {
             jump_start_time: time,
             width: CRAB_WIDTH,
             height: CRAB_HEIGHT,
-            x_position: ARENA_WIDTH*0.5,
+            x_position: ARENA_WIDTH * 0.5,
         }
     }
 }
@@ -125,8 +124,8 @@ impl Krab {
             jump_start_time: time,
             width: CRAB_WIDTH,
             height: CRAB_HEIGHT,
-            old_x_position: ARENA_WIDTH*0.5,
-            new_x_position: ARENA_WIDTH*0.5,
+            old_x_position: ARENA_WIDTH * 0.5,
+            new_x_position: ARENA_WIDTH * 0.5,
         }
     }
 }
@@ -253,7 +252,7 @@ impl SimpleState for MultiplayerState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
-        self.crab_spawn_timer.replace(2.0);
+        self.crab_spawn_timer.replace(0.0);
 
         // Get the screen dimensions so we can initialize the camera and
         // place our sprites correctly later. We'll clone this since we'll
@@ -266,9 +265,9 @@ impl SimpleState for MultiplayerState {
         // Load our sprites and display them
         self.crab_sprite_sheet_handle
             .replace(load_sprite(world, "Ferris"));
-        //init_sprites(world, &sprites, &dimensions);
 
-        self.krab_sprite_sheet_handle.replace(load_sprite(world, "Ferris_blue"));
+        self.krab_sprite_sheet_handle
+            .replace(load_sprite(world, "Ferris_blue"));
 
         world.register::<Crab>();
         world.register::<Krab>();
@@ -340,7 +339,8 @@ impl SimpleState for MultiplayerState {
         let mut buf = [0; 16];
         sock.recv_from(&mut buf).expect("Didn't receive data");
         let received: f32 = bincode::deserialize(&buf).unwrap();
-        data.world.write_resource::<Krab>().old_x_position = data.world.read_resource::<Krab>().new_x_position;
+        data.world.write_resource::<Krab>().old_x_position =
+            data.world.read_resource::<Krab>().new_x_position;
         data.world.write_resource::<Krab>().new_x_position = received;
 
         if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
