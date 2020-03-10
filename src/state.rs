@@ -9,7 +9,6 @@ use amethyst::{
     window::ScreenDimensions,
 };
 
-// use bincode::{deserialize, serialize};
 use std::net::UdpSocket;
 use std::time::Duration;
 
@@ -20,6 +19,7 @@ use log::info;
 pub enum CurrentState {
     Menu,
     Gameplay,
+    Lose,
 }
 
 impl Default for CurrentState {
@@ -236,7 +236,7 @@ impl SimpleState for Crabby {
             }
         }
 
-        if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
+        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
             return Trans::Push(Box::new(LoseState));
         }
 
@@ -334,24 +334,33 @@ impl SimpleState for MultiplayerState {
                 self.crab_spawn_timer.replace(timer);
             }
         }*/
-        if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
-            return Trans::Push(Box::new(LoseState));
-        }
-
+        let message;
         let sock = self.socket.as_ref().unwrap();
-        let crab_storage = data.world.read_storage::<Crab>();
-        let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
-        let message = bincode::serialize(&crab_entity.x_position).unwrap();
+        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
+            message = bincode::serialize(&-1.).unwrap();
+        } else { 
+            let crab_storage = data.world.read_storage::<Crab>();
+            let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
+            message = bincode::serialize(&crab_entity.x_position).unwrap();
+        }
+        
         match sock.send_to(&message, "192.168.0.127:34255") {
             Err(e) => println!("Network error {}", e),
             _ => {}
         }
 
+        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
+            return Trans::Push(Box::new(LoseState));
+        }
+        
         let mut buf = [0; 16];
         let mut storage = data.world.write_storage::<Krab>();
         let mut krab_entity = storage.get_mut(self.krab.unwrap()).unwrap();
         sock.recv_from(&mut buf).expect("Didn't receive data");
         let received: f32 = bincode::deserialize(&buf).unwrap();
+        if received == -1. {
+            return Trans::Push(Box::new(LoseState));
+        }
         krab_entity.old_x_position = krab_entity.new_x_position;
         krab_entity.new_x_position = received;
 

@@ -36,7 +36,7 @@ impl<'s> System<'s> for JumpSystem {
             if crab_y <= 0.0 {
                 // game overrrrr
                 println!("you suck");
-                game.current_state = CurrentState::Menu;
+                game.current_state = CurrentState::Lose;
                 for (e, _transform) in (&*entities, &transforms).join() {
                     match entities.delete(e) {
                         Err(e) => println!("what {}", e),
