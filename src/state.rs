@@ -371,9 +371,10 @@ impl SimpleState for MultiplayerState {
         let received: f32 = bincode::deserialize(&buf).unwrap();
         if received == -1. {
             return Trans::Push(Box::new(LoseState));
+        } else {
+            krab_entity.old_x_position = krab_entity.new_x_position;
+            krab_entity.new_x_position = received;
         }
-        krab_entity.old_x_position = krab_entity.new_x_position;
-        krab_entity.new_x_position = received;
 
         Trans::None
     }
