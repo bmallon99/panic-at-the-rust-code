@@ -331,11 +331,18 @@ impl SimpleState for MultiplayerState {
             }
             if timer <= 0.0 {
                 // When timer expire, spawn the crab
-                self.crab.replace(init_crab(data.world, self.crab_sprite_sheet_handle.clone().unwrap()));
-                self.krab.replace(init_krab(data.world, self.krab_sprite_sheet_handle.clone().unwrap()));
+                self.crab.replace(init_crab(
+                    data.world,
+                    self.crab_sprite_sheet_handle.clone().unwrap(),
+                ));
+                self.krab.replace(init_krab(
+                    data.world,
+                    self.krab_sprite_sheet_handle.clone().unwrap(),
+                ));
             } else {
                 // If timer is not expired yet, put it back onto the state.
                 self.crab_spawn_timer.replace(timer);
+                return Trans::None;
             }
         }
         let sock = self.socket.as_ref().unwrap();
@@ -351,7 +358,6 @@ impl SimpleState for MultiplayerState {
 
         send_message(sock, &message);
 
-        
         let mut buf = [0; 16];
         let mut storage = data.world.write_storage::<Krab>();
         let mut krab_entity = storage.get_mut(self.krab.unwrap()).unwrap();
@@ -359,7 +365,7 @@ impl SimpleState for MultiplayerState {
             Err(_e) => {
                 send_message(sock, &lose_message);
                 return Trans::Push(Box::new(LoseState));
-            },
+            }
             _ => {}
         }
         let received: f32 = bincode::deserialize(&buf).unwrap();
@@ -372,7 +378,6 @@ impl SimpleState for MultiplayerState {
         Trans::None
     }
 }
-
 
 /*** MENU STATE ***/
 
