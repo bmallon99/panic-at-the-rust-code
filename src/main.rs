@@ -30,12 +30,12 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(input_bundle)?
         .with(systems::CrabSystem, "crab_system", &["input_system"])
         .with(systems::KrabSystem, "krab_system", &[])
-        .with(systems::MoveCrabSystem, "move_crab", &[])
-        .with(
-            systems::JumpSystem,
-            "collision_system",
-            &["crab_system", "move_crab"],
-        )
+        // .with(systems::MoveCrabSystem, "move_crab", &[])
+        // .with(
+        //     systems::JumpSystem,
+        //     "collision_system",
+        //     &["crab_system", "move_crab"],
+        // )
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
