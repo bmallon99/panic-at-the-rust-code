@@ -333,6 +333,10 @@ impl SimpleState for MultiplayerState {
                 self.crab_spawn_timer.replace(timer);
             }
         }*/
+        if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
+            return Trans::Push(Box::new(LoseState));
+        }
+
         let sock = self.socket.as_ref().unwrap();
         let crab_storage = data.world.read_storage::<Crab>();
         let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
@@ -349,10 +353,6 @@ impl SimpleState for MultiplayerState {
         let received: f32 = bincode::deserialize(&buf).unwrap();
         krab_entity.old_x_position = krab_entity.new_x_position;
         krab_entity.new_x_position = received;
-
-        if data.world.write_resource::<Game>().current_state == CurrentState::Menu {
-            return Trans::Push(Box::new(LoseState));
-        }
 
         Trans::None
     }
