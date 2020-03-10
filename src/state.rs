@@ -334,29 +334,31 @@ impl SimpleState for MultiplayerState {
                 self.crab_spawn_timer.replace(timer);
             }
         }*/
-        let message;
         let sock = self.socket.as_ref().unwrap();
-        if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
-            message = bincode::serialize(&-1.).unwrap();
-        } else { 
-            let crab_storage = data.world.read_storage::<Crab>();
-            let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
-            message = bincode::serialize(&crab_entity.x_position).unwrap();
-        }
         
-        match sock.send_to(&message, "192.168.0.127:34255") {
-            Err(e) => println!("Network error {}", e),
-            _ => {}
-        }
+        let lose_message = bincode::serialize(&-1.).unwrap();
+        let crab_storage = data.world.read_storage::<Crab>();
+        let crab_entity = crab_storage.get(self.crab.unwrap()).unwrap();
+        let message = bincode::serialize(&crab_entity.x_position).unwrap();
 
         if data.world.write_resource::<Game>().current_state == CurrentState::Lose {
+            send_message(sock, &lose_message);
             return Trans::Push(Box::new(LoseState));
+        } else {
+            send_message(sock, &message);
+
         }
         
         let mut buf = [0; 16];
         let mut storage = data.world.write_storage::<Krab>();
         let mut krab_entity = storage.get_mut(self.krab.unwrap()).unwrap();
-        sock.recv_from(&mut buf).expect("Didn't receive data");
+        match sock.recv_from(&mut buf) {
+            Err(e) => {
+                send_message(sock, &lose_message);
+                return Trans::Push(Box::new(LoseState));
+            },
+            _ => {}
+        }
         let received: f32 = bincode::deserialize(&buf).unwrap();
         if received == -1. {
             return Trans::Push(Box::new(LoseState));
@@ -367,6 +369,7 @@ impl SimpleState for MultiplayerState {
         Trans::None
     }
 }
+
 
 /*** MENU STATE ***/
 
@@ -586,5 +589,12 @@ fn load_sprite(world: &mut World, sprite: &str) -> SpriteRender {
     SpriteRender {
         sprite_sheet: sheet_handle.clone(),
         sprite_number: 0,
+    }
+}
+
+fn send_message(sock: &UdpSocket, message: &[u8]) {
+    match sock.send_to(message, "192.168.0.127:34255") {
+        Err(e) => println!("Network error {}", e),
+        _ => {}
     }
 }
