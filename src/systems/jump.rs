@@ -59,7 +59,7 @@ impl<'s> System<'s> for JumpSystem {
                     crab_x,
                     crab_y,
                     platform_x - crab.width / 2.0,
-                    platform_y + platform.height + crab.height / 2.0 - 50.0,
+                    platform_y + platform.height + crab.height / 2.0 - 10.0,
                     platform_x + platform.width + crab.width / 2.0,
                     platform_y + platform.height + crab.height / 2.0,
                 ) {
