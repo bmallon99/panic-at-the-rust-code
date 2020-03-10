@@ -295,7 +295,7 @@ impl SimpleState for MultiplayerState {
         }
 
         let sock = self.socket.as_ref().unwrap();
-        match sock.send_to(b"hello", "192.168.0.127:34254") {
+        match sock.send_to(b"hello", "192.168.0.149:34254") {
             Err(e) => println!("Network error {}", e),
             _ => {}
         }
@@ -357,7 +357,7 @@ impl SimpleState for MenuState {
                     }
                 }
                 data.world.write_resource::<Game>().current_state = CurrentState::Gameplay;
-                if let Ok(socket) = UdpSocket::bind("192.168.0.149:34254") {
+                if let Ok(socket) = UdpSocket::bind("192.168.0.127:34255") {
                     return Trans::Push(Box::new(MultiplayerState::new(socket)));
                 } else {
                     info!("Connection refuse");
